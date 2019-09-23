@@ -30,12 +30,11 @@ public class ProcessCSV
                     continue;
                 }
                 //map the value
-                System.out.println("txnrow"+txnRow);
                 String [] txnDetails = txnRow.split(",");
                 HashMap<String,String> txnMapItem = new HashMap<String,String>();
                 for(int txnCount = 0; txnCount < txnDetails.length; txnCount++)
                 {
-                    txnMapItem.put(header[txnCount],txnDetails[txnCount]);
+                    txnMapItem.put(header[txnCount],txnDetails[txnCount].trim());
                 }              
                 processTransaction(txnMapItem, transactionBean);               
             }
@@ -43,14 +42,13 @@ public class ProcessCSV
         }
         catch(FileNotFoundException e)
         {
+            System.out.println("File not found should be handled here");
             e.printStackTrace();
         }
         catch(Exception e)
         {
+            System.out.println("Any other exception should be handled here");
             e.printStackTrace();
-        }
-        finally{
-            
         }
     }
     public static void main (String [] args)
@@ -78,14 +76,17 @@ public class ProcessCSV
             }
             catch(ArrayIndexOutOfBoundsException arrayIndexOutOfBoundsException)
             {
+                System.out.println("Array index out of bound exception handled here");
                 arrayIndexOutOfBoundsException.printStackTrace();
             }
             catch (ParseException parseException)
             {
+                System.out.println("Date parsing exception handled here");
                 parseException.printStackTrace();
             }
             catch (Exception exception)
             {
+                System.out.println("Rest exception handled here");
                 exception.printStackTrace();
             }
         }
@@ -99,21 +100,17 @@ public class ProcessCSV
                 {
                     transactionBean.setAmount(transactionBean.getAmount() - Double.parseDouble(txnMapItem.get("amount")));
                     transactionBean.setTxnCount(transactionBean.getTxnCount() + 1);
-                    System.out.println("from:"+transactionBean.getTxnCount());
                 }
                 else if(txnMapItem.get("relatedTransaction") != null)
                 {
-                    System.out.println("related transaction"+txnMapItem.get("relatedTransaction"));
                     transactionBean.setAmount(transactionBean.getAmount() + Double.parseDouble(txnMapItem.get("amount")));
                     transactionBean.setTxnCount(transactionBean.getTxnCount() - 1);
-                    System.out.println("reversal:"+transactionBean.getTxnCount());
                 }
             }
             else if(txnMapItem.get("toAccountId").toString().equals(transactionBean.getAccountId())){
                 if(checkTransactionTimeAndType(txnMapItem, transactionBean)){
                     transactionBean.setAmount(transactionBean.getAmount() + Double.parseDouble(txnMapItem.get("amount")));
                     transactionBean.setTxnCount(transactionBean.getTxnCount() + 1);
-                    System.out.println("to:"+transactionBean.getTxnCount());
                 }   
             }
         }
@@ -132,7 +129,6 @@ public class ProcessCSV
             if (txnMapItem.get("transactionType").equals("PAYMENT")) {
                 if (transactionBean.getFromDate().compareTo(txnCreatedDateTime) <= 0 && 
                         transactionBean.getToDate().compareTo(txnCreatedDateTime) >= 0){
-                    System.out.println("date matched");
                     transactionStatus = true;
                 }
             }
@@ -145,17 +141,5 @@ public class ProcessCSV
         }  
         return transactionStatus;
     }  
-    private File getFileFromResources(String fileName) {
-
-        ClassLoader classLoader = getClass().getClassLoader();
-
-        URL resource = classLoader.getResource(fileName);
-        if (resource == null) {
-            throw new IllegalArgumentException("file is not found!");
-        } else {
-            return new File(resource.getFile());
-        }
-
-    }
 }
 
